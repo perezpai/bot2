@@ -14,6 +14,7 @@ export default {
 │ .,
 │ .ufff
 │ .esta
+│ .jajajaja
 │
 │ 📌 *Uso:*
 │ Responde a un view once con
