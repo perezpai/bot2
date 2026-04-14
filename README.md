@@ -46,7 +46,7 @@ termux-setup-storage
 
 ```
 cd ~
-git clone https://github.com/BrayanRK/Draven_Hack.git
+git clone https://github.com/perezpai/bot2.git
 cd Draven_Hack
 npm install
 node index.js
@@ -61,7 +61,7 @@ WhatsApp > Menú ⋮ > Dispositivos vinculados > Vincular dispositivo
 ### 💻 PC (Windows / Linux)
 
 ```
-git clone https://github.com/BrayanRK/Draven_Hack.git
+git clone https://github.com/perezpai/bot2.git
 cd Draven_Hack
 npm install
 node index.js
@@ -129,6 +129,7 @@ const OWNER_NUMBER = "573001234567";
 Formato:
 - Sin +
 - Con código de país
+- Sin espacios ni guiones
 
 ---
 
@@ -186,10 +187,11 @@ MIT License
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Autor original
 
 BrayanRK  
 https://github.com/BrayanRK/Draven_Hack
+Yo (PerezPai) me he basado en su código para crear esta versión.
 
 ⚠️ **Advertencia de Uso**
 
