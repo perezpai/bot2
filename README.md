@@ -1,4 +1,4 @@
-# 🏴‍☠️ Draven_Hack
+# 🏴‍☠️ Perez_Bot
 
 > Bot de WhatsApp basado en **Baileys** para recuperar archivos de “ver una sola vez” (foto, video y audio) y guardarlos en el almacenamiento del dispositivo.  
 > Basado en la librería [Baileys](https://github.com/whiskeysockets/Baileys).
@@ -7,7 +7,7 @@
 
 ## 🚀 Características
 
-Draven_Hack te permite recuperar cualquier contenido de “ver una sola vez” y guardarlo localmente sin dejar rastro en el chat.
+Perez_Bot te permite recuperar cualquier contenido de “ver una sola vez” y guardarlo localmente sin dejar rastro en el chat.
 
 - Recupera:
   - Imágenes de ver una vez
@@ -16,7 +16,7 @@ Draven_Hack te permite recuperar cualquier contenido de “ver una sola vez” y
 - Guarda automáticamente en:
 
   ```text
-  storage/shared/DravenHack/
+  storage/shared/PerezBot/
 
 ## 🚀 Características
 
@@ -26,7 +26,7 @@ Draven_Hack te permite recuperar cualquier contenido de “ver una sola vez” y
   - Audios de ver una vez
 - Guarda automáticamente en:
 ```
-storage/shared/DravenHack/
+storage/shared/PerezBot/
 ```
 - Funcionamiento silencioso (no envía nada al chat)
 - Sistema modular (index.js + commands/)
@@ -59,7 +59,7 @@ WhatsApp > Menú ⋮ > Dispositivos vinculados > Vincular dispositivo
 
 ```
 git clone https://github.com/perezpai/bot2.git
-cd Draven_Hack
+cd Perez_Bot
 npm install
 node index.js
 ```
@@ -71,15 +71,18 @@ node index.js
 ### Comando principal
 
 ```
-.vv
+.v
 ```
 
 ### Alias
 
 ```
+..
+.,
 .ver
-.viewonce
-.revelar
+.ufff
+.esta
+.jajajaja
 ```
 
 ### Flujo de uso
@@ -88,21 +91,21 @@ node index.js
 2. Responde a ese mensaje con:
 
 ```
-.vv
+.v
 ```
 
 3. El archivo se guardará en:
 
 ```
-storage/shared/DravenHack/
+storage/shared/PerezBot/
 ```
 
 Ejemplo:
 
 ```
-imagen_draven_1712400000000.jpg
-video_draven_1712400000000.mp4
-audio_draven_1712400000000.ogg
+imagen_perezbot_1712400000000.jpg
+video_perezbot_1712400000000.mp4
+audio_perezbot_1712400000000.ogg
 ```
 
 Nota: El bot no envía el archivo al chat.
@@ -114,7 +117,7 @@ Nota: El bot no envía el archivo al chat.
 Edita tu número en index.js:
 
 ```
-const OWNER_NUMBER = "573223090406";
+const OWNER_NUMBER = "573001234567";
 ```
 
 Ejemplo:
@@ -133,9 +136,9 @@ Formato:
 ## 📂 Estructura
 
 ```
-Draven_Hack/
+Perez_Bot/
 ├── commands/
-│   └── vv.js
+│   └── v.js
 ├── index.js
 ├── package.json
 ├── README.md
@@ -165,14 +168,14 @@ termux-setup-storage
 Verifica:
 
 ```
-ls ~/storage/shared/DravenHack
+ls ~/storage/shared/PerezBot
 ```
 
 ---
 
 ### No responde
 
-- Usa .vv
+- Usa .v
 - Debe ser el número owner
 - Revisa la consola
 
@@ -184,7 +187,7 @@ MIT License
 
 ---
 
-## 👨‍💻 Autor original
+## 👨‍💻 Autor 
 
 BrayanRK  
 https://github.com/BrayanRK/Draven_Hack
