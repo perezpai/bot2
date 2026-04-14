@@ -23,7 +23,7 @@ const question = (text) =>
     new Promise((resolve) => rl.question(text, resolve));
 
 // Pregunta con timeout usando el evento 'line' para poder cancelar correctamente
-function askWithTimeout(text, timeoutMs = 15000, defaultVal = "1") {
+function askWithTimeout(text, timeoutMs = 60000, defaultVal = "1") {
     return new Promise((resolve) => {
         process.stdout.write(text);
 
@@ -181,8 +181,8 @@ async function startBot() {
     if (!state.creds.registered) {
         try {
             const choice = await askWithTimeout(
-                "🔐 ¿Cómo quiere conectar? (1=QR, 2=Código) [por defecto 1 en 15s]: ",
-                15000,
+                "🔐 ¿Cómo quiere conectar? (1=QR, 2=Código) [por defecto 1 en 60s]: ",
+                60000,
                 "1"
             );
 

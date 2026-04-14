@@ -34,7 +34,32 @@ storage/shared/PerezBot/
 
 ---
 
+
 ## 📥 Instalación
+
+### 📱 Android (Termux)
+
+```
+git clone https://github.com/perezpai/bot2.git 
+cd bot2
+npm install
+node index.js
+```
+
+Escanea el QR:
+
+WhatsApp > Menú ⋮ > Dispositivos vinculados > Vincular dispositivo
+
+--- 
+
+### 💻 PC (Windows / Linux)
+
+```
+git clone https://github.com/perezpai/bot2.git 
+cd bot2
+npm install
+node index.js
+```
 
 ### 📱 Android (Termux)
 
@@ -136,7 +161,7 @@ Formato:
 ## 📂 Estructura
 
 ```
-Perez_Bot/
+bot2/
 ├── commands/
 │   └── v.js
 ├── index.js
