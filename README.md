@@ -1,4 +1,4 @@
-# 🏴‍☠️ Perez_Bot
+# Perez_Bot
 
 > Bot de WhatsApp basado en **Baileys** para recuperar archivos de “ver una sola vez” (foto, video y audio) y guardarlos en el almacenamiento del dispositivo.  
 > Basado en la librería [Baileys](https://github.com/whiskeysockets/Baileys).
