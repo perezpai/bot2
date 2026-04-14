@@ -8,7 +8,7 @@ export default {
 │ 📂 *Comando principal:*
 │ .v
 │
-│ 🔁 *Aliases de v:*
+│ 🔁 *Alias de v:*
 │ .ver
 │ ..
 │ .,

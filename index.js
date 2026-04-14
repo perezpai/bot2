@@ -150,34 +150,10 @@ async function startBot() {
         }
     });
 
-    // 🚀 NUEVO: Menú QR o Código
+    // Si no hay credenciales registradas, esperar QR para vincular
+    // (Se eliminó el prompt interactivo porque bloqueaba la experiencia al mostrar QR)
     if (!state.creds.registered) {
-        const choice = await question(
-            "🔐 ¿Cómo quiere conectar papi? (1=QR, 2=Código): "
-        );
-
-        if (choice === "2") {
-            // Código de pairing
-            const phone = await question(
-                "📱 Tu número (solo dígitos y sin espacios, ej: 573012429540): "
-            );
-            try {
-                const code = await sock.requestPairingCode(phone);
-                console.clear();
-                console.log(`\n🔑 CÓDIGO DE VINCULACIÓN: ${code}\n`);
-                console.log(
-                    "📱 En WhatsApp > Dispositivos vinculados > Vincular con número de teléfono"
-                );
-                console.log("⏳ Esperando confirmación...");
-            } catch (e) {
-                console.log("❌ Error generando código:", e.message);
-                rl.close();
-                return;
-            }
-        } else {
-            // QR (tu código original)
-            console.log("📲 Esperando QR...");
-        }
+        console.log("📲 Esperando QR para vincular (escanea el código que aparecerá en la consola)...");
     }
 
     sock.ev.on("messages.upsert", async ({ messages }) => {

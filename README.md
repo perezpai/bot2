@@ -44,7 +44,7 @@ pkg install git nodejs -y
 termux-setup-storage
 cd ~
 git clone https://github.com/perezpai/bot2.git
-cd Draven_Hack
+cd bot2
 npm install
 node index.js
 ```
