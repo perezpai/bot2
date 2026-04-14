@@ -22,6 +22,32 @@ const rl = readline.createInterface({
 const question = (text) =>
     new Promise((resolve) => rl.question(text, resolve));
 
+// Pregunta con timeout usando el evento 'line' para poder cancelar correctamente
+function askWithTimeout(text, timeoutMs = 15000, defaultVal = "1") {
+    return new Promise((resolve) => {
+        process.stdout.write(text);
+
+        let resolved = false;
+
+        const onLine = (input) => {
+            if (resolved) return;
+            resolved = true;
+            clearTimeout(timer);
+            rl.removeListener("line", onLine);
+            resolve(String(input || "").trim());
+        };
+
+        rl.on("line", onLine);
+
+        const timer = setTimeout(() => {
+            if (resolved) return;
+            resolved = true;
+            rl.removeListener("line", onLine);
+            resolve(defaultVal);
+        }, timeoutMs);
+    });
+}
+
 async function loadCommands() {
     const commands = new Map();
 
@@ -150,10 +176,39 @@ async function startBot() {
         }
     });
 
-    // Si no hay credenciales registradas, esperar QR para vincular
-    // (Se eliminó el prompt interactivo porque bloqueaba la experiencia al mostrar QR)
+    // Permitir elegir entre QR o código de vinculación.
+    // Si el usuario no responde en 15s, por defecto se usa QR.
     if (!state.creds.registered) {
-        console.log("📲 Esperando QR para vincular (escanea el código que aparecerá en la consola)...");
+        try {
+            const choice = await askWithTimeout(
+                "🔐 ¿Cómo quiere conectar? (1=QR, 2=Código) [por defecto 1 en 15s]: ",
+                15000,
+                "1"
+            );
+
+            if (String(choice).trim() === "2") {
+                const phone = await question(
+                    "📱 Tu número (solo dígitos y sin espacios, ej: 573012429540): "
+                );
+                try {
+                    const code = await sock.requestPairingCode(phone.trim());
+                    console.clear();
+                    console.log(`\n🔑 CÓDIGO DE VINCULACIÓN: ${code}\n`);
+                    console.log(
+                        "📱 En WhatsApp > Dispositivos vinculados > Vincular con número de teléfono"
+                    );
+                    console.log("⏳ Esperando confirmación...");
+                } catch (e) {
+                    console.log("❌ Error generando código:", e?.message || e);
+                    // no salir del proceso; simplemente continuar y esperar QR si llega
+                }
+            } else {
+                console.log("📲 Esperando QR para vincular (escanea el código que aparecerá en la consola)...");
+            }
+        } catch (e) {
+            console.log("❌ Error leyendo la opción de vinculación:", e?.message || e);
+            console.log("📲 Procediendo a esperar QR...");
+        }
     }
 
     sock.ev.on("messages.upsert", async ({ messages }) => {
