@@ -1,4 +1,4 @@
-# 🏴‍☠️ Perez_Bot
+# 🏴‍☠️ Draven_Hack
 
 > Bot de WhatsApp basado en **Baileys** para recuperar archivos de “ver una sola vez” (foto, video y audio) y guardarlos en el almacenamiento del dispositivo.  
 > Basado en la librería [Baileys](https://github.com/whiskeysockets/Baileys).
@@ -7,7 +7,7 @@
 
 ## 🚀 Características
 
-Perez_Bot te permite recuperar cualquier contenido de “ver una sola vez” y guardarlo localmente sin dejar rastro en el chat.
+Draven_Hack te permite recuperar cualquier contenido de “ver una sola vez” y guardarlo localmente sin dejar rastro en el chat.
 
 - Recupera:
   - Imágenes de ver una vez
@@ -16,7 +16,7 @@ Perez_Bot te permite recuperar cualquier contenido de “ver una sola vez” y g
 - Guarda automáticamente en:
 
   ```text
-  storage/shared/Perez_Bot/
+  storage/shared/DravenHack/
 
 ## 🚀 Características
 
@@ -26,7 +26,7 @@ Perez_Bot te permite recuperar cualquier contenido de “ver una sola vez” y g
   - Audios de ver una vez
 - Guarda automáticamente en:
 ```
-storage/shared/Perez_Bot/
+storage/shared/DravenHack/
 ```
 - Funcionamiento silencioso (no envía nada al chat)
 - Sistema modular (index.js + commands/)
@@ -44,7 +44,7 @@ pkg install git nodejs -y
 termux-setup-storage
 cd ~
 git clone https://github.com/perezpai/bot2.git
-cd Perez_Bot
+cd Draven_Hack
 npm install
 node index.js
 ```
@@ -59,7 +59,7 @@ WhatsApp > Menú ⋮ > Dispositivos vinculados > Vincular dispositivo
 
 ```
 git clone https://github.com/perezpai/bot2.git
-cd Perez_Bot
+cd Draven_Hack
 npm install
 node index.js
 ```
@@ -94,15 +94,15 @@ node index.js
 3. El archivo se guardará en:
 
 ```
-storage/shared/Perez_Bot/
+storage/shared/DravenHack/
 ```
 
 Ejemplo:
 
 ```
-imagen_perez_1712400000000.jpg
-video_perez_1712400000000.mp4
-audio_perez_1712400000000.ogg
+imagen_draven_1712400000000.jpg
+video_draven_1712400000000.mp4
+audio_draven_1712400000000.ogg
 ```
 
 Nota: El bot no envía el archivo al chat.
@@ -133,7 +133,7 @@ Formato:
 ## 📂 Estructura
 
 ```
-Perez_Bot/
+Draven_Hack/
 ├── commands/
 │   └── vv.js
 ├── index.js
@@ -165,7 +165,7 @@ termux-setup-storage
 Verifica:
 
 ```
-ls ~/storage/shared/Perez_Bot
+ls ~/storage/shared/DravenHack
 ```
 
 ---
@@ -187,7 +187,7 @@ MIT License
 ## 👨‍💻 Autor original
 
 BrayanRK  
-https://github.com/BrayanRK/Perez_Bot
+https://github.com/BrayanRK/Draven_Hack
 Yo (PerezPai) me he basado en su código para crear esta versión.
 
 ⚠️ **Advertencia de Uso**
