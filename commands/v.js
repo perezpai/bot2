@@ -13,12 +13,12 @@ const isTermux =
     homeDir.includes("/data/data/com.termux/files/home");
 
 const DOWNLOAD_DIR = isTermux
-    ? path.join(homeDir, "storage", "shared", "DravenHack")
-    : path.join(homeDir, "DravenHack");
+    ? path.join(homeDir, "storage", "shared", "Perez_Bot")
+    : path.join(homeDir, "Perez_Bot");
 
 const TEMP_DIR = isTermux
-    ? path.join(homeDir, "storage", "shared", "DravenTemp")
-    : path.join(homeDir, "DravenTemp");
+    ? path.join(homeDir, "storage", "shared", "PerezTemp")
+    : path.join(homeDir, "PerezTemp");
 
 if (!fs.existsSync(DOWNLOAD_DIR)) {
     fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
@@ -107,26 +107,26 @@ export default {
             }
 
             if (media.type === "image") {
-                const fileName = `imagen_draven_${Date.now()}.jpg`;
+                const fileName = `imagen_perez_${Date.now()}.jpg`;
                 const filePath = path.join(DOWNLOAD_DIR, fileName);
                 fs.writeFileSync(filePath, buffer);
                 return;
             }
 
             if (media.type === "audio") {
-                tempFile = path.join(TEMP_DIR, `audio_draven_${Date.now()}.ogg`);
+                tempFile = path.join(TEMP_DIR, `audio_perez_${Date.now()}.ogg`);
                 fs.writeFileSync(tempFile, buffer);
 
-                const finalName = `audio_draven_${Date.now()}.ogg`;
+                const finalName = `audio_perez_${Date.now()}.ogg`;
                 const finalPath = path.join(DOWNLOAD_DIR, finalName);
                 fs.copyFileSync(tempFile, finalPath);
                 return;
             }
 
-            tempFile = path.join(TEMP_DIR, `video_draven_${Date.now()}.mp4`);
+            tempFile = path.join(TEMP_DIR, `video_perez_${Date.now()}.mp4`);
             fs.writeFileSync(tempFile, buffer);
 
-            const finalName = `video_draven_${Date.now()}.mp4`;
+            const finalName = `video_perez_${Date.now()}.mp4`;
             const finalPath = path.join(DOWNLOAD_DIR, finalName);
             fs.copyFileSync(tempFile, finalPath);
         } catch { }

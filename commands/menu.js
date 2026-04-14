@@ -3,7 +3,7 @@ export default {
     aliases: ["help", "comandos", "cmd"],
     async run(sock, msg) {
         const texto = `
-╭─〔 *DRAVEN_HACK* 〕─╮
+╭─〔 *PEREZ_BOT* 〕─╮
 │
 │ 📂 *Comando principal:*
 │ .vv
