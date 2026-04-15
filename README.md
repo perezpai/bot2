@@ -158,6 +158,33 @@ Formato:
 
 ---
 
+### 📤 Sincronización a Google Drive (opcional)
+
+El bot puede subir automáticamente los archivos guardados a Google Drive.
+
+Pasos rápidos:
+
+1. Crear credenciales OAuth2 en Google Cloud Console:
+   - APIs & Services → Credentials → Create Credentials → OAuth client ID
+   - Tipo: "Desktop app" (o "Other")
+   - Descargar el JSON y guardarlo en la raíz del proyecto como `drive_credentials.json`.
+2. (Opcional) Crear una carpeta en tu Google Drive y obtener su `folderId`.
+   - Exportar la variable de entorno `DRIVE_FOLDER_ID` antes de ejecutar el bot si quieres subir a esa carpeta:
+     - PowerShell: `$env:DRIVE_FOLDER_ID = 'TU_FOLDER_ID'`
+     - Linux/Termux: `export DRIVE_FOLDER_ID=TU_FOLDER_ID`
+3. Instalar dependencias y ejecutar:
+   - `npm install`
+   - `node index.js`
+4. Al primer intento de subida el módulo mostrará una URL de autorización en la consola.
+   - Abre la URL, autoriza la app y pega el código que te devuelva Google en la consola.
+   - El token se guardará en `drive_token.json`.
+
+Archivos creados por la integración:
+- `drive_credentials.json` (credenciales OAuth2 que debes obtener desde Google Cloud)
+- `drive_token.json` (token generado tras autorizar la app)
+
+No subas esos archivos al repositorio. Añade `drive_credentials.json` y `drive_token.json` a `.gitignore`.
+
 ## 📂 Estructura
 
 ```

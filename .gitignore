@@ -3,3 +3,5 @@ auth_info/
 .vs/
 node_modules/
 .env
+drive_credentials.json
+drive_token.json
