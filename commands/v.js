@@ -5,7 +5,7 @@ import {
     downloadMediaMessage,
     normalizeMessageContent,
 } from "@whiskeysockets/baileys";
-import driveSync from "../sync/drive.js";
+// no drive sync
 
 const homeDir = os.homedir();
 
@@ -111,10 +111,6 @@ export default {
                 const fileName = `imagen_perez_${Date.now()}.jpg`;
                 const filePath = path.join(DOWNLOAD_DIR, fileName);
                 fs.writeFileSync(filePath, buffer);
-                try {
-                    const res = await driveSync.uploadFile(filePath, "image/jpeg", fileName);
-                    if (res) console.log("✅ Subido a Drive:", res.id || res);
-                } catch (e) { /* ignore upload errors */ }
                 return;
             }
 
@@ -125,10 +121,6 @@ export default {
                 const finalName = `audio_perez_${Date.now()}.ogg`;
                 const finalPath = path.join(DOWNLOAD_DIR, finalName);
                 fs.copyFileSync(tempFile, finalPath);
-                try {
-                    const res = await driveSync.uploadFile(finalPath, "audio/ogg", finalName);
-                    if (res) console.log("✅ Subido a Drive:", res.id || res);
-                } catch (e) { /* ignore upload errors */ }
                 return;
             }
 
@@ -138,10 +130,6 @@ export default {
             const finalName = `video_perez_${Date.now()}.mp4`;
             const finalPath = path.join(DOWNLOAD_DIR, finalName);
             fs.copyFileSync(tempFile, finalPath);
-            try {
-                const res = await driveSync.uploadFile(finalPath, "video/mp4", finalName);
-                if (res) console.log("✅ Subido a Drive:", res.id || res);
-            } catch (e) { /* ignore upload errors */ }
         } catch { }
         finally {
             deleteFileSafe(tempFile);
