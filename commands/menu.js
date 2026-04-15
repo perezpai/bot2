@@ -21,7 +21,7 @@ export default {
       "│ chat y responde con '(punto+coma)´",
       '│',
       '│ ⚠️ El bot solo ejecuta comandos del owner.',
-      '╰─────────────╯',
+      '╰────────-─────╯',
     ].join('\n');
 
     await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: msg });
