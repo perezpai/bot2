@@ -20,10 +20,11 @@ export default {
       '│ 📌 Uso rápido:',
       '│  - Recuperar un "ver una sola vez":',
       '│ responde ese mensaje con .v',
-      '│  - Guardar un estado: reenvía el estado al',
-      "│ chat y responde con '(punto+coma)´",
+      '│  - Guardar un estado: reenvía el estado',
+      "│ al chat y responde con '(punto+coma)´",
       '│',
-      '│ ⚠️ El bot solo ejecuta comandos del owner.',
+      '│ ⚠️ El bot solo ejecuta comandos',
+      '│del owner.',
       '╰─────────────╯',
     ].join('\n');
 
