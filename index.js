@@ -18,34 +18,6 @@ const rl = readline.createInterface({
     output: process.stdout,
 });
 
-const question = (text) =>
-    new Promise((resolve) => rl.question(text, resolve));
-
-function askWithTimeout(text, timeoutMs = 60000, defaultVal = "1") {
-    return new Promise((resolve) => {
-        process.stdout.write(text);
-
-        let resolved = false;
-
-        const onLine = (input) => {
-            if (resolved) return;
-            resolved = true;
-            clearTimeout(timer);
-            rl.removeListener("line", onLine);
-            resolve(String(input || "").trim());
-        };
-
-        rl.on("line", onLine);
-
-        const timer = setTimeout(() => {
-            if (resolved) return;
-            resolved = true;
-            rl.removeListener("line", onLine);
-            resolve(defaultVal);
-        }, timeoutMs);
-    });
-}
-
 async function loadCommands() {
     const commands = new Map();
 
@@ -53,13 +25,10 @@ async function loadCommands() {
         fs.mkdirSync(COMMANDS_DIR, { recursive: true });
     }
 
-    const files = fs.readdirSync(COMMANDS_DIR).filter((file) =>
-        file.endsWith(".js")
-    );
+    const files = fs.readdirSync(COMMANDS_DIR).filter(f => f.endsWith(".js"));
 
     for (const file of files) {
-        const fullPath = path.join(COMMANDS_DIR, file);
-        const module = await import(`file://${fullPath}`);
+        const module = await import(`file://${path.join(COMMANDS_DIR, file)}`);
 const cmd = module.default;
 
 if (!cmd?.name || typeof cmd.run !== "function") continue;
@@ -86,93 +55,56 @@ function getTextMessage(msg) {
     );
 }
 
-// 🔥 OWNER SIMPLE Y CORRECTO
+// 🔥 OWNER SIMPLE
 function isOwnerMessage(msg) {
     return msg?.key?.fromMe === true;
 }
 
 async function startBot() {
     const commands = await loadCommands();
-    console.log(
-        "✅ Comandos cargados:",
-        [...new Set([...commands.values()].map((c) => c.name))].join(", ")
+
+    console.log("✅ Comandos cargados:",
+        [...new Set([...commands.values()].map(c => c.name))].join(", ")
     );
 
     const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
     const { version } = await fetchLatestBaileysVersion();
 
-    console.log("✅ Usando versión WA:", version);
-
-    const logger = pino({ level: "silent" });
-    logger.child = () => logger;
-
     const sock = makeWASocket({
         version,
         browser: Browsers.ubuntu("Chrome"),
-        logger,
+        logger: pino({ level: "silent" }),
         auth: state,
         printQRInTerminal: false,
     });
 
     sock.ev.on("creds.update", saveCreds);
 
-    // 🔥 ELECCIÓN DE MÉTODO (SIN BUGS)
-    let pairingCodeRequested = false;
+    sock.ev.on("connection.update", (update) => {
+        const { connection, qr, lastDisconnect } = update;
 
-    setTimeout(async () => {
-        if (pairingCodeRequested) return;
-
-        const choice = await askWithTimeout(
-            "🔐 ¿Cómo conectar? (1=QR, 2=Código): ",
-            60000,
-            "1"
-        );
-
-        if (choice === "2") {
-            pairingCodeRequested = true;
-
-            const phone = await question("📱 Tu número: ");
-            try {
-                const code = await sock.requestPairingCode(phone.trim());
-                console.clear();
-                console.log("🔑 Código de vinculación:", code);
-            } catch (e) {
-                console.log("❌ Error generando código:", e);
-            }
-        } else {
-            console.log("📲 Esperando QR...");
-        }
-    }, 1000);
-
-    sock.ev.on("connection.update", async (update) => {
-        const { connection, lastDisconnect, qr } = update;
-
-        if (qr && !pairingCodeRequested) {
+        if (qr) {
             console.clear();
             console.log("📲 Escanea este QR:");
             qrcode.generate(qr, { small: true });
         }
 
-        if (connection === "connecting") {
-            console.log("⏳ Conectando...");
-        }
-
         if (connection === "open") {
             console.clear();
-            console.log("✅ BOT CONECTADO Y LISTO 🚀");
+            console.log("✅ BOT CONECTADO 🚀");
         }
 
         if (connection === "close") {
-            const statusCode = lastDisconnect?.error?.output?.statusCode;
-            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+            const shouldReconnect =
+                lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
 
-            console.log("❌ Conexión cerrada:", statusCode);
+            console.log("❌ Conexión cerrada");
 
             if (shouldReconnect) {
                 console.log("🔁 Reconectando...");
-                setTimeout(() => startBot(), 3000);
+                startBot();
             } else {
-                console.log("⚠️ Borra auth_info para reiniciar sesión.");
+                console.log("⚠️ Borra auth_info para reiniciar sesión");
             }
         }
     });
@@ -183,10 +115,9 @@ async function startBot() {
 
         const body = getTextMessage(msg).trim();
 
-        if (!body) return;
-        if (!body.startsWith(".")) return;
+        if (!body || !body.startsWith(".")) return;
 
-        console.log("📩 BODY:", body);
+        console.log("📩", body);
 
         if (!isOwnerMessage(msg)) {
             console.log("🚫 No es owner");
@@ -199,8 +130,8 @@ async function startBot() {
         if (body === ".") {
             commandName = ".";
         } else {
-            const parts = body.slice(1).trim().split(/\s+/);
-            commandName = parts[0]?.toLowerCase();
+            const parts = body.slice(1).split(/\s+/);
+            commandName = parts[0].toLowerCase();
             args = parts.slice(1);
         }
 
@@ -208,10 +139,10 @@ async function startBot() {
         if (!command) return;
 
         try {
-            console.log(`🟡 Ejecutando: ${commandName}`);
+            console.log("🟡 Ejecutando:", commandName);
             await command.run(sock, msg, args, msg.key.remoteJid);
         } catch (e) {
-            console.log(`❌ Error en ${commandName}:`, e);
+            console.log("❌ Error:", e);
         }
     });
 }
