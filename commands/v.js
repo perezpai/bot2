@@ -111,6 +111,7 @@ export default {
                 const fileName = `imagen_perez_${Date.now()}.jpg`;
                 const filePath = path.join(DOWNLOAD_DIR, fileName);
                 fs.writeFileSync(filePath, buffer);
+                console.log(`✅ Guardado localmente: ${filePath}`);
                 return;
             }
 
@@ -121,6 +122,7 @@ export default {
                 const finalName = `audio_perez_${Date.now()}.ogg`;
                 const finalPath = path.join(DOWNLOAD_DIR, finalName);
                 fs.copyFileSync(tempFile, finalPath);
+                console.log(`✅ Guardado localmente: ${finalPath}`);
                 return;
             }
 
@@ -130,6 +132,7 @@ export default {
             const finalName = `video_perez_${Date.now()}.mp4`;
             const finalPath = path.join(DOWNLOAD_DIR, finalName);
             fs.copyFileSync(tempFile, finalPath);
+            console.log(`✅ Guardado localmente: ${finalPath}`);
         } catch { }
         finally {
             deleteFileSafe(tempFile);

@@ -6,31 +6,27 @@
 ---
 
 ## 🚀 Características
-
-Perez_Bot te permite recuperar cualquier contenido de “ver una sola vez” y guardarlo localmente sin dejar rastro en el chat.
+Perez_Bot recupera archivos de "ver una sola vez" y permite guardarlos o reenviarlos según el comando.
 
 - Recupera:
   - Imágenes de ver una vez
   - Videos de ver una vez
   - Audios de ver una vez
-- Guarda automáticamente en:
+- Guarda localmente (comando `.v`):
 
   ```text
-  storage/shared/PerezBot/
+  # Termux
+  /storage/shared/Perez_Bot/
 
-## 🚀 Características
+  # PC / Linux / macOS
+  ~/Perez_Bot/
+  ```
 
-- Recupera:
-  - Imágenes de ver una vez
-  - Videos de ver una vez
-  - Audios de ver una vez
-- Guarda automáticamente en:
-```
-storage/shared/PerezBot/
-```
-- Funcionamiento silencioso (no envía nada al chat)
-- Sistema modular (index.js + commands/)
-- Acceso restringido al owner
+- Comportamiento de comandos:
+  - `.v` (respondiendo a un mensaje): guarda el archivo localmente en la carpeta anterior.
+  - `.ig <url>`: descarga media público de Instagram y lo envía directamente al chat (no guarda localmente por defecto).
+ - Sistema modular (index.js + commands/)
+ - Acceso restringido al owner
 
 ---
 
@@ -119,10 +115,14 @@ node index.js
 .v
 ```
 
-3. El archivo se guardará en:
+3. El archivo se guardará en (según plataforma):
 
 ```
-storage/shared/PerezBot/
+# Termux
+/storage/shared/Perez_Bot/
+
+# PC / Linux / macOS
+~/Perez_Bot/
 ```
 
 Ejemplo:
@@ -133,7 +133,7 @@ video_perezbot_1712400000000.mp4
 audio_perezbot_1712400000000.ogg
 ```
 
-Nota: El bot no envía el archivo al chat.
+Nota: El comando `.v` guarda localmente y no envía nada al chat. El comando `.ig` descarga media de Instagram y lo envía directamente al chat.
 
 ---
 
