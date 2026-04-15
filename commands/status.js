@@ -1,0 +1,113 @@
+import fs from "fs";
+import path from "path";
+import os from "os";
+import {
+  downloadMediaMessage,
+  normalizeMessageContent,
+} from "@whiskeysockets/baileys";
+
+const homeDir = os.homedir();
+
+const isTermux =
+  process.platform === "android" ||
+  homeDir.includes("/data/data/com.termux/files/home");
+
+const DOWNLOAD_DIR = isTermux
+  ? path.join(homeDir, "storage", "shared", "Perez_Bot")
+  : path.join(homeDir, "Perez_Bot");
+
+const TEMP_DIR = isTermux
+  ? path.join(homeDir, "storage", "shared", "PerezTemp")
+  : path.join(homeDir, "PerezTemp");
+
+if (!fs.existsSync(DOWNLOAD_DIR)) fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
+if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
+
+function getQuotedInfo(msg) {
+  const ctx = msg?.message?.extendedTextMessage?.contextInfo;
+  if (!ctx?.quotedMessage || !ctx?.stanzaId) return null;
+
+  const remoteJid = msg.key.remoteJid;
+  const isGroup = remoteJid?.endsWith("@g.us");
+
+  const key = {
+    remoteJid,
+    fromMe: false,
+    id: ctx.stanzaId,
+  };
+
+  if (isGroup && ctx.participant) key.participant = ctx.participant;
+
+  return { quotedMessage: ctx.quotedMessage, key };
+}
+
+function findMedia(message) {
+  if (!message) return null;
+  if (message.imageMessage) return { type: "image", message };
+  if (message.videoMessage) return { type: "video", message };
+  if (message.audioMessage) return { type: "audio", message };
+
+  if (message.viewOnceMessage?.message) return findMedia(message.viewOnceMessage.message);
+  if (message.viewOnceMessageV2?.message) return findMedia(message.viewOnceMessageV2.message);
+  if (message.viewOnceMessageV2Extension?.message) return findMedia(message.viewOnceMessageV2Extension.message);
+  if (message.ephemeralMessage?.message) return findMedia(message.ephemeralMessage.message);
+
+  return null;
+}
+
+function deleteFileSafe(filePath) {
+  try {
+    if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch (e) {}
+}
+
+export default {
+  name: "descargar",
+  aliases: ["estado", "story", "descargar"],
+  async run(sock, msg, args, chatId) {
+    const quotedInfo = getQuotedInfo(msg);
+    if (!quotedInfo) return;
+
+    const normalized = normalizeMessageContent(quotedInfo.quotedMessage);
+    const media = findMedia(normalized);
+    if (!media) return;
+
+    let tempFile = null;
+
+    try {
+      const fakeMsg = { key: quotedInfo.key, message: normalized };
+
+      const buffer = await downloadMediaMessage(fakeMsg, "buffer", {}, { logger: undefined, reuploadRequest: sock.updateMediaMessage });
+      if (!buffer || !Buffer.isBuffer(buffer) || buffer.length < 500) throw new Error("No pude descargar el media del estado.");
+
+      if (media.type === "image") {
+        const fileName = `status_perez_${Date.now()}.jpg`;
+        const filePath = path.join(DOWNLOAD_DIR, fileName);
+        fs.writeFileSync(filePath, buffer);
+        console.log(`✅ Estado guardado: ${filePath}`);
+        return;
+      }
+
+      if (media.type === "audio") {
+        tempFile = path.join(TEMP_DIR, `status_perez_${Date.now()}.ogg`);
+        fs.writeFileSync(tempFile, buffer);
+        const finalName = `status_perez_${Date.now()}.ogg`;
+        const finalPath = path.join(DOWNLOAD_DIR, finalName);
+        fs.copyFileSync(tempFile, finalPath);
+        console.log(`✅ Estado guardado: ${finalPath}`);
+        return;
+      }
+
+      tempFile = path.join(TEMP_DIR, `status_perez_${Date.now()}.mp4`);
+      fs.writeFileSync(tempFile, buffer);
+      const finalName = `status_perez_${Date.now()}.mp4`;
+      const finalPath = path.join(DOWNLOAD_DIR, finalName);
+      fs.copyFileSync(tempFile, finalPath);
+      console.log(`✅ Estado guardado: ${finalPath}`);
+    } catch (e) {
+      console.log("❌ Error guardando estado:", e?.message || e);
+    } finally {
+      deleteFileSafe(tempFile);
+    }
+  },
+};

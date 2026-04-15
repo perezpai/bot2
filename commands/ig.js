@@ -29,21 +29,50 @@ function guessExtFromContentType(ct) {
 async function fetchHtml(url) {
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36",
+      // use a mobile user-agent and referer to increase chance of public page HTML
+      "User-Agent": "Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Mobile Safari/537.36",
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      Referer: "https://www.instagram.com/",
     },
+    redirect: "follow",
   });
   return await res.text();
 }
 
 function extractOgMedia(html) {
-  // buscar og:video primero
-  const videoMatch = html.match(/<meta\s+property=(?:"|')og:video(?:"|')\s+content=(?:"|')([^"']+)(?:"|')/i);
-  if (videoMatch) return { url: videoMatch[1], type: "video" };
+  // 1) meta og:video, og:video:secure_url, og:video:url
+  const metaVideo = html.match(/<meta[^>]+property=["']?(?:og:video|og:video:secure_url|og:video:url)["']?[^>]+content=["']([^"']+)["']/i);
+  if (metaVideo) return { url: metaVideo[1], type: "video" };
 
-  // buscar og:image (puede ser imagen o poster)
-  const imgMatch = html.match(/<meta\s+property=(?:"|')og:image(?:"|')\s+content=(?:"|')([^"']+)(?:"|')/i);
-  if (imgMatch) return { url: imgMatch[1], type: "image" };
+  // 2) meta og:image or og:image:secure_url
+  const metaImage = html.match(/<meta[^>]+property=["']?(?:og:image|og:image:secure_url)["']?[^>]+content=["']([^"']+)["']/i);
+  if (metaImage) return { url: metaImage[1], type: "image" };
+
+  // 3) application/ld+json with contentUrl or image
+  const ldMatch = html.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i);
+  if (ldMatch) {
+    try {
+      const data = JSON.parse(ldMatch[1]);
+      if (data && data.contentUrl) return { url: data.contentUrl, type: "video" };
+      if (data && data.image) return { url: Array.isArray(data.image) ? data.image[0] : data.image, type: "image" };
+    } catch (e) { }
+  }
+
+  // 4) Buscar JSON incrustado con keys "video_url" o "display_url" (Instagram page scripts)
+  const videoJson = html.match(/"video_url"\s*:\s*"([^"]+)"/i);
+  if (videoJson) {
+    try { return { url: JSON.parse('"' + videoJson[1] + '"'), type: "video" }; } catch { return { url: videoJson[1], type: "video" }; }
+  }
+
+  const displayJson = html.match(/"display_url"\s*:\s*"([^"]+)"/i);
+  if (displayJson) {
+    try { return { url: JSON.parse('"' + displayJson[1] + '"'), type: "image" }; } catch { return { url: displayJson[1], type: "image" }; }
+  }
+
+  // 5) twitter card fallback
+  const twitterPlayer = html.match(/<meta[^>]+name=["']twitter:player:stream["'][^>]+content=["']([^"']+)["']/i);
+  if (twitterPlayer) return { url: twitterPlayer[1], type: "video" };
 
   return null;
 }
@@ -63,9 +92,48 @@ export default {
         return;
       }
 
-      console.log(`🔎 Descargando página: ${link}`);
-      const html = await fetchHtml(link);
-      const media = extractOgMedia(html);
+      console.log(`🔎 Intentando obtener metadata pública de: ${link}`);
+
+      // 1) Intentar endpoint JSON público (más fiable cuando funciona)
+      let media = null;
+      try {
+        const jsonUrl = link + (link.includes("?") ? "&" : "?") + "__a=1&__d=dis";
+        const jres = await fetch(jsonUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Mobile Safari/537.36",
+            Referer: "https://www.instagram.com/",
+            Accept: "application/json",
+          },
+          redirect: "follow",
+        });
+
+        if (jres.ok) {
+          const j = await jres.json().catch(() => null);
+          const data = j?.graphql?.shortcode_media || j?.items?.[0] || null;
+          if (data) {
+            if (data.video_url || data.is_video && data.video_url) {
+              media = { url: data.video_url || data.video_url, type: "video" };
+            } else if (data.display_url) {
+              media = { url: data.display_url, type: "image" };
+            } else if (data.edge_sidecar_to_children && data.edge_sidecar_to_children.edges) {
+              // take first
+              const first = data.edge_sidecar_to_children.edges[0]?.node;
+              if (first) {
+                if (first.is_video) media = { url: first.video_url, type: "video" };
+                else media = { url: first.display_url, type: "image" };
+              }
+            }
+          }
+        }
+      } catch (e) { /* ignore JSON endpoint errors and fallback to HTML */ }
+
+      // 2) fallback a HTML si no se obtuvo media
+      if (!media) {
+        console.log(`🔎 Descargando página HTML: ${link}`);
+        const html = await fetchHtml(link);
+        media = extractOgMedia(html);
+      }
+
       if (!media || !media.url) {
         console.log("❌ No se encontró media en la página.");
         return;

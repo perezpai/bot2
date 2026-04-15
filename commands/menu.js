@@ -3,29 +3,23 @@ export default {
     aliases: ["help", "comandos", "cmd"],
     async run(sock, msg) {
         const texto = `
-╭─〔 *PEREZ_BOT* 〕─╮
-│
-│ 📂 *Comando principal:*
-│ .v
-│
-│ 🔁 *Alias de v:*
-│ .ver
-│ ..
-│ .,
-│ .ufff
-│ .esta
-│ .jajajaja
-│
-│ 📌 *Uso:*
-│ Responde a un view once con
-│ cualquiera de esos comandos
-│ 📌 *Aviso:*
-│ Puedes cambiar los alias, pero
-│ no se actualizará este menú.
-│ De igual manera, el bot seguirá
-│ respondiendo a los alias nuevos
-│
-╰────────────────╯
+--─〔 *PEREZ_BOT* 〕─--
+
+ 📂 *Comandos principales:*
+ .v         → Guarda localmente (respondiendo a un view-once)
+ .ig <url>  → Descarga media público de Instagram y lo envía al chat
+ .descargar → Guarda un estado (respondiendo al mensaje del estado reenviado)
+
+ 🔁 *Alias de .v:*
+ .ver  ..  .,  .ufff  .esta  .jajajaja
+
+ 📌 *Uso rápido:*
+ - Para recuperar un "ver una sola vez": responde ese mensaje con `.v`.
+ - Para descargar un post de Instagram público: escribe `.ig <url>`.
+ - Para guardar un estado: reenvía/compare el estado al chat y responde con `.descargar`.
+
+ ⚠️ El bot solo ejecuta comandos del owner.
+
 `.trim();
 
         await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: msg });
