@@ -9,11 +9,14 @@ export default {
       '│  .v    → Guarda localmente',
       '│ (respondiendo a un view-once)',
       '│  .,	 → Guarda un estado (respondiendo', 
-      '│ al mensaje reenviado) ejecutar como (punto+coma)',
+      '│ al mensaje reenviado) ejecutar como',
+      '│(punto+coma)',
       '│',
-      '│ 🔁 Alias de .v: .ver  ..  .ufff  .esta  .jajajaja',
-      '│ 🔁 Alias de .,: .estado, .story, .descargar',
-      '',
+      '│ 🔁 Alias de .v:',
+      '│.ver  ..  .ufff  .esta  .jajajaja',
+      '│ 🔁 Alias de .,:',
+      '│.estado, .story, .descargar',
+      '│',
       '│ 📌 Uso rápido:',
       '│  - Recuperar un "ver una sola vez":',
       '│ responde ese mensaje con .v',
@@ -21,7 +24,7 @@ export default {
       "│ chat y responde con '(punto+coma)´",
       '│',
       '│ ⚠️ El bot solo ejecuta comandos del owner.',
-      '╰────────-─-────╯',
+      '╰─────────────╯',
     ].join('\n');
 
     await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: msg });
