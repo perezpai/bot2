@@ -86,7 +86,7 @@ function getTextMessage(msg) {
     );
 }
 
-// 🔥 OWNER SIMPLE Y 100% FUNCIONAL
+// 🔥 OWNER SIMPLE Y CORRECTO
 function isOwnerMessage(msg) {
     return msg?.key?.fromMe === true;
 }
@@ -116,31 +116,38 @@ async function startBot() {
 
     sock.ev.on("creds.update", saveCreds);
 
-    // 🔥 MENSAJE INICIAL (SOLO UNA VEZ)
-    console.log("🔐 Iniciando conexión...");
-    const choice = await askWithTimeout(
-        "🔐 ¿Cómo conectar? (1=QR, 2=Código): ",
-        60000,
-        "1"
-    );
+    // 🔥 ELECCIÓN DE MÉTODO (SIN BUGS)
+    let pairingCodeRequested = false;
 
-    if (choice === "2") {
-        const phone = await question("📱 Tu número: ");
-        try {
-            const code = await sock.requestPairingCode(phone.trim());
-            console.clear();
-            console.log("🔑 Código de vinculación:", code);
-        } catch (e) {
-            console.log("❌ Error generando código:", e);
+    setTimeout(async () => {
+        if (pairingCodeRequested) return;
+
+        const choice = await askWithTimeout(
+            "🔐 ¿Cómo conectar? (1=QR, 2=Código): ",
+            60000,
+            "1"
+        );
+
+        if (choice === "2") {
+            pairingCodeRequested = true;
+
+            const phone = await question("📱 Tu número: ");
+            try {
+                const code = await sock.requestPairingCode(phone.trim());
+                console.clear();
+                console.log("🔑 Código de vinculación:", code);
+            } catch (e) {
+                console.log("❌ Error generando código:", e);
+            }
+        } else {
+            console.log("📲 Esperando QR...");
         }
-    } else {
-        console.log("📲 Escanea el QR cuando aparezca...");
-    }
+    }, 1000);
 
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        if (qr) {
+        if (qr && !pairingCodeRequested) {
             console.clear();
             console.log("📲 Escanea este QR:");
             qrcode.generate(qr, { small: true });
@@ -176,13 +183,11 @@ async function startBot() {
 
         const body = getTextMessage(msg).trim();
 
-        // ❌ Ignorar basura
         if (!body) return;
         if (!body.startsWith(".")) return;
 
         console.log("📩 BODY:", body);
 
-        // 🔒 SOLO OWNER (tú)
         if (!isOwnerMessage(msg)) {
             console.log("🚫 No es owner");
             return;
