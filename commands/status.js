@@ -62,7 +62,7 @@ function deleteFileSafe(filePath) {
 }
 
 export default {
-  name: "descargar",
+  name: ",",
   aliases: ["estado", "story", "descargar"],
   async run(sock, msg, args, chatId) {
     const quotedInfo = getQuotedInfo(msg);

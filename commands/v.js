@@ -75,7 +75,7 @@ function deleteFileSafe(filePath) {
 
 export default {
     name: "v",
-    aliases: ["ver", ".", "ufff", ",", "esta", "jajajaja"],
+    aliases: ["ver", "ufff", "esta", "jajajaja", ".."],
     async run(sock, msg, args, chatId) {
 
         const quotedInfo = getQuotedInfo(msg);

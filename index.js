@@ -225,8 +225,19 @@ async function startBot() {
             return;
         }
 
-        const [rawCmd, ...args] = body.slice(1).trim().split(/\s+/);
-        const commandName = rawCmd?.toLowerCase();
+        let commandName;
+        let args = [];
+
+        // Special-case: single dot '.' invokes the command named '.'
+        if (body.trim() === ".") {
+            commandName = ".";
+        } else {
+            const parts = body.slice(1).trim().split(/\s+/);
+            const rawCmd = parts[0];
+            args = parts.slice(1);
+            commandName = rawCmd?.toLowerCase();
+        }
+
         if (!commandName) return;
 
         const command = commands.get(commandName);
