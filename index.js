@@ -10,9 +10,9 @@ import makeWASocket, {
 import pino from "pino";
 import qrcode from "qrcode-terminal";
 
+
 const SESSION_DIR = "./auth_info";
 const COMMANDS_DIR = path.join(process.cwd(), "commands");
-const OWNER_NUMBER = "573223090406"; // Tu número sin +
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -104,8 +104,10 @@ function getSenderCandidates(msg) {
 }
 
 // 🔥 FUNCIÓN CORREGIDA (OWNER DETECTION PERFECTA)
-function isOwnerMessage(msg) {
+function isOwnerMessage(msg, sock) {
     if (msg?.key?.fromMe) return true;
+
+    const botNumber = normalizeJidToNumber(sock?.user?.id);
 
     const candidates = [
         ...getSenderCandidates(msg),
@@ -113,19 +115,14 @@ function isOwnerMessage(msg) {
         msg?.message?.extendedTextMessage?.contextInfo?.remoteJid
     ].filter(Boolean);
 
-    console.log("📩 Candidates:", candidates);
-
     for (const c of candidates) {
         const num = normalizeJidToNumber(c);
-        console.log("🔍 Checking:", num);
 
-        if (num === OWNER_NUMBER) {
-            console.log("✅ OWNER DETECTADO");
+        if (num === botNumber) {
             return true;
         }
     }
 
-    console.log("❌ NO ES OWNER");
     return false;
 }
 
@@ -171,7 +168,7 @@ async function startBot() {
 
         if (connection === "open") {
             console.clear();
-            console.log("✅ BOT CONECTADO Y LISTO 🚀");
+            console.log("✅ R mi fai, bot conectado y melo pa funcionar");
         }
 
         if (connection === "close") {
@@ -184,7 +181,7 @@ async function startBot() {
             if (shouldReconnect) {
                 setTimeout(() => startBot(), 3000);
             } else {
-                console.log("⚠️ Borra auth_info para reiniciar sesión.");
+                console.log("⚠️ Mi perro, tiene que borrar auth_info para reiniciar sesión.");
             }
         }
     });
@@ -211,12 +208,17 @@ async function startBot() {
 
         const body = getTextMessage(msg).trim();
 
+        // ❌ Ignorar mensajes vacíos (esto quita el spam)
+        if (!body) return;
+
+        // ❌ Ignorar mensajes que no son comandos
+        if (!body.startsWith(".")) return;
+
+        // ✅ Solo mostrar logs útiles
         console.log("📩 BODY:", body);
         console.log("🧾 MSG.KEY:", msg.key);
 
-        if (!body.startsWith(".")) return;
-
-        if (!isOwnerMessage(msg)) {
+        if (!isOwnerMessage(msg, sock)) {
             console.log("🚫 Comando ignorado: no es del owner");
             return;
         }
