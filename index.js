@@ -9,12 +9,10 @@ import makeWASocket, {
 } from "@whiskeysockets/baileys";
 import pino from "pino";
 import qrcode from "qrcode-terminal";
-let qrShown = false;
-// drive sync removed
 
 const SESSION_DIR = "./auth_info";
 const COMMANDS_DIR = path.join(process.cwd(), "commands");
-const OWNER_NUMBER = "573223090406"; // Tu número sin + y sin espacios
+const OWNER_NUMBER = "573223090406"; // Tu número sin +
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -24,7 +22,6 @@ const rl = readline.createInterface({
 const question = (text) =>
     new Promise((resolve) => rl.question(text, resolve));
 
-// Pregunta con timeout usando el evento 'line' para poder cancelar correctamente
 function askWithTimeout(text, timeoutMs = 60000, defaultVal = "1") {
     return new Promise((resolve) => {
         process.stdout.write(text);
@@ -64,20 +61,20 @@ async function loadCommands() {
     for (const file of files) {
         const fullPath = path.join(COMMANDS_DIR, file);
         const module = await import(`file://${fullPath}`);
-        const cmd = module.default;
+const cmd = module.default;
 
-        if (!cmd?.name || typeof cmd.run !== "function") continue;
+if (!cmd?.name || typeof cmd.run !== "function") continue;
 
-        commands.set(cmd.name, cmd);
+commands.set(cmd.name, cmd);
 
-        if (Array.isArray(cmd.aliases)) {
-            for (const alias of cmd.aliases) {
-                commands.set(alias, cmd);
-            }
-        }
+if (Array.isArray(cmd.aliases)) {
+    for (const alias of cmd.aliases) {
+        commands.set(alias, cmd);
+    }
+}
     }
 
-    return commands;
+return commands;
 }
 
 function getTextMessage(msg) {
@@ -106,20 +103,30 @@ function getSenderCandidates(msg) {
     ].filter(Boolean);
 }
 
+// 🔥 FUNCIÓN CORREGIDA (OWNER DETECTION PERFECTA)
 function isOwnerMessage(msg) {
-    const senderCandidates = getSenderCandidates(msg);
+    if (msg?.key?.fromMe) return true;
 
-    console.log("📩 Sender detectado:", senderCandidates);
-    console.log("📱 Normalizado:", senderCandidates.map(normalizeJidToNumber));
+    const candidates = [
+        ...getSenderCandidates(msg),
+        msg?.message?.extendedTextMessage?.contextInfo?.participant,
+        msg?.message?.extendedTextMessage?.contextInfo?.remoteJid
+    ].filter(Boolean);
 
-    for (const candidate of senderCandidates) {
-        const number = normalizeJidToNumber(candidate);
-        if (number === OWNER_NUMBER) {
+    console.log("📩 Candidates:", candidates);
+
+    for (const c of candidates) {
+        const num = normalizeJidToNumber(c);
+        console.log("🔍 Checking:", num);
+
+        if (num === OWNER_NUMBER) {
+            console.log("✅ OWNER DETECTADO");
             return true;
         }
     }
 
-    return msg?.key?.fromMe === true;
+    console.log("❌ NO ES OWNER");
+    return false;
 }
 
 async function startBot() {
@@ -142,7 +149,7 @@ async function startBot() {
         browser: Browsers.ubuntu("Chrome"),
         logger,
         auth: state,
-        printQRInTerminal: false, // Necesario para código
+        printQRInTerminal: false,
     });
 
     sock.ev.on("creds.update", saveCreds);
@@ -152,7 +159,6 @@ async function startBot() {
 
         console.log("🔄 Estado conexión:", connection);
 
-        // Mostrar QR SOLO si no está registrado
         if (qr && !sock.authState?.creds?.registered) {
             console.clear();
             console.log("📲 Escanea este QR:");
@@ -165,68 +171,37 @@ async function startBot() {
 
         if (connection === "open") {
             console.clear();
-            console.log("✅ Todo melo mi papacho, bot conectado correctamente!");
+            console.log("✅ BOT CONECTADO Y LISTO 🚀");
         }
 
         if (connection === "close") {
             const statusCode = lastDisconnect?.error?.output?.statusCode;
             const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
-            console.log("❌ Pai, conexión cerrada. Reconectar:", statusCode);
+            console.log("❌ Conexión cerrada:", statusCode);
             console.log("🔁 Reconectar:", shouldReconnect);
 
             if (shouldReconnect) {
                 setTimeout(() => startBot(), 3000);
             } else {
-                console.log("⚠️ Sesión cerrada mi perro. Tenes que borrar auth_info si queres reconectar.");
+                console.log("⚠️ Borra auth_info para reiniciar sesión.");
             }
         }
     });
 
-
-
-
-
-
-
-
-
-
-
-
-
-    // Permitir elegir entre QR o código de vinculación.
-    // Si el usuario no responde en 15s, por defecto se usa QR.
     if (!state.creds.registered) {
-        try {
-            const choice = await askWithTimeout(
-                "🔐 ¿Cómo quiere conectar? (1=QR, 2=Código) [por defecto 1 en 60s]: ",
-                60000,
-                "1"
-            );
+        const choice = await askWithTimeout(
+            "🔐 ¿Cómo conectar? (1=QR, 2=Código): ",
+            60000,
+            "1"
+        );
 
-            if (String(choice).trim() === "2") {
-                const phone = await question(
-                    "📱 Tu número (solo dígitos y sin espacios, ej: 573012429540): "
-                );
-                try {
-                    const code = await sock.requestPairingCode(phone.trim());
-                    console.clear();
-                    console.log(`\n🔑 CÓDIGO DE VINCULACIÓN: ${code}\n`);
-                    console.log(
-                        "📱 En WhatsApp > Dispositivos vinculados > Vincular con número de teléfono"
-                    );
-                    console.log("⏳ Esperando confirmación...");
-                } catch (e) {
-                    console.log("❌ Error generando código:", e?.message || e);
-                    // no salir del proceso; simplemente continuar y esperar QR si llega
-                }
-            } else {
-                console.log("📲 Esperando QR para vincular (escanea el código que aparecerá en la consola)...");
-            }
-        } catch (e) {
-            console.log("❌ Error leyendo la opción de vinculación:", e?.message || e);
-            console.log("📲 Procediendo a esperar QR...");
+        if (choice === "2") {
+            const phone = await question("📱 Tu número: ");
+            const code = await sock.requestPairingCode(phone.trim());
+            console.log("🔑 Código:", code);
+        } else {
+            console.log("📲 Esperando QR...");
         }
     }
 
@@ -235,9 +210,12 @@ async function startBot() {
         if (!msg?.message) return;
 
         const body = getTextMessage(msg).trim();
+
+        console.log("📩 BODY:", body);
+        console.log("🧾 MSG.KEY:", msg.key);
+
         if (!body.startsWith(".")) return;
 
-        // ✅ VERIFICACIÓN ESTRICTA: SOLO TUS MENSAJES
         if (!isOwnerMessage(msg)) {
             console.log("🚫 Comando ignorado: no es del owner");
             return;
@@ -246,26 +224,22 @@ async function startBot() {
         let commandName;
         let args = [];
 
-        // Special-case: single dot '.' invokes the command named '.'
         if (body.trim() === ".") {
             commandName = ".";
         } else {
             const parts = body.slice(1).trim().split(/\s+/);
-            const rawCmd = parts[0];
+            commandName = parts[0]?.toLowerCase();
             args = parts.slice(1);
-            commandName = rawCmd?.toLowerCase();
         }
-
-        if (!commandName) return;
 
         const command = commands.get(commandName);
         if (!command) return;
 
         try {
-            console.log(`🟡 Ejecutando: ${commandName} por owner`);
+            console.log(`🟡 Ejecutando: ${commandName}`);
             await command.run(sock, msg, args, msg.key.remoteJid);
         } catch (e) {
-            console.log(`❌ Error en ${commandName}:`, e?.message || e);
+            console.log(`❌ Error en ${commandName}:`, e);
         }
     });
 }
