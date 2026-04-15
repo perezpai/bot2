@@ -156,7 +156,7 @@ async function startBot() {
 
         console.log("🔄 Estado conexión:", connection);
 
-        if (qr && !sock.authState?.creds?.registered) {
+        if (qr) {
             console.clear();
             console.log("📲 Escanea este QR:");
             qrcode.generate(qr, { small: true });
@@ -186,6 +186,7 @@ async function startBot() {
         }
     });
 
+    // 🔥 SOLO preguntar si NO está registrado
     if (!state.creds.registered) {
         const choice = await askWithTimeout(
             "🔐 ¿Cómo conectar? (1=QR, 2=Código): ",
@@ -195,10 +196,15 @@ async function startBot() {
 
         if (choice === "2") {
             const phone = await question("📱 Tu número: ");
-            const code = await sock.requestPairingCode(phone.trim());
-            console.log("🔑 Código:", code);
+            try {
+                const code = await sock.requestPairingCode(phone.trim());
+                console.clear();
+                console.log("🔑 Código de vinculación:", code);
+            } catch (e) {
+                console.log("❌ Error generando código:", e);
+            }
         } else {
-            console.log("📲 Esperando QR...");
+            console.log("📲 Esperando QR (escanea cuando aparezca)...");
         }
     }
 
