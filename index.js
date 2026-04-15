@@ -163,7 +163,8 @@ async function startBot() {
         }
 
         if (connection === "open") {
-            console.log("✅ Todo melo mi papacho, bot conectado y listo!");
+            qrShown = false;
+            console.log("✅ Bot conectado correctamente!");
             return;
         }
 
