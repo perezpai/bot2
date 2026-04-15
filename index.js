@@ -150,36 +150,50 @@ async function startBot() {
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        if (connection === "connecting") {
-            console.log("⏳ Conectando...");
-            return;
-        }
+        console.log("🔄 Estado conexión:", connection);
 
-        if (qr && !qrShown) {
-            qrShown = true;
+        // Mostrar QR SOLO si no está registrado
+        if (qr && !sock.authState?.creds?.registered) {
             console.clear();
-            console.log("📲 Escanea este QR una sola vez:");
+            console.log("📲 Escanea este QR:");
             qrcode.generate(qr, { small: true });
         }
 
+        if (connection === "connecting") {
+            console.log("⏳ Conectando...");
+        }
+
         if (connection === "open") {
-            qrShown = false;
-            console.log("✅ Bot conectado correctamente!");
-            return;
+            console.clear();
+            console.log("✅ Todo melo mi papacho, bot conectado correctamente!");
         }
 
         if (connection === "close") {
             const statusCode = lastDisconnect?.error?.output?.statusCode;
             const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-            console.log("❌ Pai, conexión cerrada. Reconectar:", shouldReconnect);
+
+            console.log("❌ Pai, conexión cerrada. Reconectar:", statusCode);
+            console.log("🔁 Reconectar:", shouldReconnect);
+
             if (shouldReconnect) {
                 setTimeout(() => startBot(), 3000);
             } else {
                 console.log("⚠️ Sesión cerrada mi perro. Tenes que borrar auth_info si queres reconectar.");
             }
-            return;
         }
     });
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Permitir elegir entre QR o código de vinculación.
     // Si el usuario no responde en 15s, por defecto se usa QR.
