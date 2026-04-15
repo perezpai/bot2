@@ -24,7 +24,7 @@ Perez_Bot recupera archivos de "ver una sola vez" y permite guardarlos o reenvia
 
 - Comportamiento de comandos:
   - `.v` (respondiendo a un mensaje): guarda el archivo localmente en la carpeta anterior.
-  - `,` (coma, respondiendo a un mensaje reenviado de un estado): guarda el media del estado en la carpeta local.
+  - `.,` (punto+coma) — guarda el media del estado en la carpeta local. Aliases: `.estado`, `.story`, `.descargar`.
  - Sistema modular (index.js + commands/)
  - Acceso restringido al owner
 
@@ -133,8 +133,8 @@ video_perezbot_1712400000000.mp4
 audio_perezbot_1712400000000.ogg
 ```
 
-Nota: El comando `.v` guarda localmente y no envía nada al chat. El comando `.ig` descarga media de Instagram y lo envía directamente al chat.
-Nota: El comando `.descargar` guarda estados localmente (respondiendo al mensaje reenviado del estado).
+Nota: El comando `.v` guarda localmente y no envía nada al chat.
+Nota: El comando para guardar estados se invoca como `.,` (punto+coma) o mediante los aliases: `.estado`, `.story`, `.descargar`.
 
 ---
 
