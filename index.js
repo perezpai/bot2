@@ -106,17 +106,19 @@ function getSenderCandidates(msg) {
 }
 
 function isOwnerMessage(msg) {
-    // Si el mensaje lo enviaste tú desde tu WhatsApp
-    if (msg?.key?.fromMe) return true;
+    const senderCandidates = getSenderCandidates(msg);
 
-    const sender =
-        msg?.key?.participant ||
-        msg?.key?.remoteJid ||
-        "";
+    console.log("📩 Sender detectado:", senderCandidates);
+    console.log("📱 Normalizado:", senderCandidates.map(normalizeJidToNumber));
 
-    const number = normalizeJidToNumber(sender);
+    for (const candidate of senderCandidates) {
+        const number = normalizeJidToNumber(candidate);
+        if (number === OWNER_NUMBER) {
+            return true;
+        }
+    }
 
-    return number === OWNER_NUMBER;
+    return msg?.key?.fromMe === true;
 }
 
 async function startBot() {
