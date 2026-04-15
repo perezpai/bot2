@@ -9,6 +9,7 @@ import makeWASocket, {
 } from "@whiskeysockets/baileys";
 import pino from "pino";
 import qrcode from "qrcode-terminal";
+let qrShown = false;
 // drive sync removed
 
 const SESSION_DIR = "./auth_info";
@@ -154,11 +155,11 @@ async function startBot() {
             return;
         }
 
-        if (qr) {
+        if (qr && !qrShown) {
+            qrShown = true;
             console.clear();
-            console.log("📲 Socio, escanee este QR con WhatsApp > Dispositivos vinculados");
+            console.log("📲 Escanea este QR una sola vez:");
             qrcode.generate(qr, { small: true });
-            return;
         }
 
         if (connection === "open") {
