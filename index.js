@@ -123,7 +123,10 @@ function normalizeNumber(jid = "") {
 // 🔥 OWNER FLEXIBLE
 function isOwnerMessage(msg, sock) {
     // Permitir ejecuciones desde la propia sesión del bot
-    if (msg?.key?.fromMe) return true;
+    if (msg?.key?.fromMe) {
+        console.log("✅ Mensaje del bot (fromMe=true)");
+        return true;
+    }
 
     // Si aún no se determinó el OWNER, denegar por defecto
     if (!BOT_OWNER) {
@@ -139,8 +142,13 @@ function isOwnerMessage(msg, sock) {
 
     const num = normalizeNumber(sender);
 
+    console.log(`📊 Debug: sender="${sender}", normalized="${num}", BOT_OWNER="${BOT_OWNER}"`);
+
     // Solo el número propietario puede ejecutar comandos
-    return num === BOT_OWNER;
+    const isOwner = num === BOT_OWNER;
+    console.log(`${isOwner ? "✅" : "❌"} Verificación OWNER: ${isOwner}`);
+
+    return isOwner;
 }
 
 async function startBot() {
@@ -227,6 +235,7 @@ async function startBot() {
         if (connection === "open") {
             console.clear();
             console.log("✅ BOT CONECTADO 🚀");
+            console.log(`👤 OWNER: ${BOT_OWNER}`);
             // Si el OWNER aún no está asignado, intentar determinarlo
             if (!BOT_OWNER) {
                 try {
@@ -267,6 +276,8 @@ async function startBot() {
         if (!body.startsWith(".")) return;
 
         console.log("📩 BODY:", body);
+        console.log(`📍 BOT_OWNER ACTUAL: ${BOT_OWNER}`);
+        console.log(`📍 msg.key.fromMe: ${msg?.key?.fromMe}`);
 
         if (!isOwnerMessage(msg, sock)) {
             console.log("🚫 No autorizado");
