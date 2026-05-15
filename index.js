@@ -13,8 +13,9 @@ import qrcode from "qrcode-terminal";
 const SESSION_DIR = "./auth_info";
 const COMMANDS_DIR = path.join(process.cwd(), "commands");
 
-// 🔥 CONFIGURACIÓN OWNER (para repo público)
-const OWNERS = []; // Ej: ["573001234567"] → vacío = bot público
+// El OWNER será la cuenta autenticada (la sesión del bot). Se asigna a BOT_OWNER
+// cuando se cargan las credenciales.
+let BOT_OWNER = null;
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -95,9 +96,14 @@ function normalizeNumber(jid = "") {
 
 // 🔥 OWNER FLEXIBLE
 function isOwnerMessage(msg, sock) {
+    // Permitir ejecuciones desde la propia sesión del bot
     if (msg?.key?.fromMe) return true;
 
-    if (OWNERS.length === 0) return true; // modo público
+    // Si aún no se determinó el OWNER, denegar por defecto
+    if (!BOT_OWNER) {
+        console.log("⚠️ OWNER no determinado. Comando denegado.");
+        return false;
+    }
 
     const sender =
         msg?.key?.participant ||
@@ -107,7 +113,8 @@ function isOwnerMessage(msg, sock) {
 
     const num = normalizeNumber(sender);
 
-    return OWNERS.includes(num);
+    // Solo el número propietario puede ejecutar comandos
+    return num === BOT_OWNER;
 }
 
 async function startBot() {
@@ -120,6 +127,8 @@ async function startBot() {
 
     const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
     const { version } = await fetchLatestBaileysVersion();
+    // Normalizar y asignar el número del propietario (solo dígitos)
+    BOT_OWNER = normalizeNumber(state.creds.me.id);
 
     console.log("✅ Usando versión WA:", version);
 
