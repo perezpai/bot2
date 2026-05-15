@@ -146,8 +146,8 @@ function isOwnerMessage(msg, sock) {
 
     console.log(`📊 Debug: sender="${sender}", normalized="${num}", BOT_OWNER="${BOT_OWNER}"`);
 
-    // Solo el número propietario puede ejecutar comandos
-    const isOwner = num === BOT_OWNER;
+    // Comparar: número completo O últimos 10 dígitos (por variaciones de códigos de país)
+    const isOwner = num === BOT_OWNER || num.slice(-10) === BOT_OWNER.slice(-10);
     console.log(`${isOwner ? "✅" : "❌"} Verificación OWNER: ${isOwner}`);
 
     return isOwner;
