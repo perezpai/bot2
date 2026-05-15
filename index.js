@@ -12,10 +12,36 @@ import qrcode from "qrcode-terminal";
 
 const SESSION_DIR = "./auth_info";
 const COMMANDS_DIR = path.join(process.cwd(), "commands");
+const OWNER_FILE = path.join(SESSION_DIR, "owner.txt");
 
 // El OWNER será la cuenta autenticada (la sesión del bot). Se asigna a BOT_OWNER
 // cuando se cargan las credenciales.
 let BOT_OWNER = null;
+
+// Función para guardar el OWNER persistentemente
+function saveOwner(ownerNumber) {
+    try {
+        if (!fs.existsSync(SESSION_DIR)) {
+            fs.mkdirSync(SESSION_DIR, { recursive: true });
+        }
+        fs.writeFileSync(OWNER_FILE, ownerNumber, "utf8");
+    } catch (e) {
+        console.error("❌ Error guardando OWNER:", e.message);
+    }
+}
+
+// Función para cargar el OWNER guardado
+function loadOwner() {
+    try {
+        if (fs.existsSync(OWNER_FILE)) {
+            const stored = fs.readFileSync(OWNER_FILE, "utf8").trim();
+            if (stored) return stored;
+        }
+    } catch (e) {
+        console.error("❌ Error cargando OWNER:", e.message);
+    }
+    return null;
+}
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -127,17 +153,26 @@ async function startBot() {
 
     const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
     const { version } = await fetchLatestBaileysVersion();
-    // Normalizar y asignar el número del propietario (solo dígitos) si está disponible.
-    if (state?.creds?.me?.id) {
+
+    // Intentar cargar el OWNER guardado (persistente)
+    let savedOwner = loadOwner();
+
+    // Determinar el OWNER de forma segura
+    if (savedOwner) {
+        BOT_OWNER = savedOwner;
+        console.log("✅ Owner cargado desde archivo persistente:", BOT_OWNER);
+    } else if (state?.creds?.me?.id) {
         BOT_OWNER = normalizeNumber(state.creds.me.id);
+        saveOwner(BOT_OWNER);
         console.log("✅ Owner asignado desde credenciales:", BOT_OWNER);
     } else if (process.env.BOT_OWNER) {
         BOT_OWNER = normalizeNumber(process.env.BOT_OWNER);
+        saveOwner(BOT_OWNER);
         console.log("✅ Owner asignado desde env BOT_OWNER:", BOT_OWNER);
     } else {
         BOT_OWNER = null;
         console.log(
-            "⚠️ Owner no disponible en credenciales. Se asignará cuando la sesión se abra."
+            "⚠️ Owner no disponible. Se asignará cuando la sesión se abra."
         );
     }
 
@@ -192,15 +227,18 @@ async function startBot() {
         if (connection === "open") {
             console.clear();
             console.log("✅ BOT CONECTADO 🚀");
-            // Intentar determinar el OWNER desde la sesión abierta si no fue posible antes
-            try {
-                const sessionId = sock?.user?.id || state?.creds?.me?.id;
-                if (sessionId) {
-                    BOT_OWNER = normalizeNumber(sessionId);
-                    console.log("✅ Owner determinado:", BOT_OWNER);
+            // Si el OWNER aún no está asignado, intentar determinarlo
+            if (!BOT_OWNER) {
+                try {
+                    const sessionId = sock?.user?.id || state?.creds?.me?.id;
+                    if (sessionId) {
+                        BOT_OWNER = normalizeNumber(sessionId);
+                        saveOwner(BOT_OWNER);
+                        console.log("✅ Owner determinado en apertura:", BOT_OWNER);
+                    }
+                } catch (e) {
+                    console.log("⚠️ No se pudo determinar OWNER en apertura:", e);
                 }
-            } catch (e) {
-                console.log("⚠️ No se pudo determinar OWNER en apertura:", e);
             }
         }
 
