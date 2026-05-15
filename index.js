@@ -280,6 +280,11 @@ async function startBot() {
         console.log("📩 BODY:", body);
         console.log(`📍 BOT_OWNER ACTUAL: ${BOT_OWNER}`);
         console.log(`📍 msg.key.fromMe: ${msg?.key?.fromMe}`);
+        console.log(`🔍 DEBUG ESTRUCTURA:`);
+        console.log(`   - msg.key.participant: ${msg?.key?.participant}`);
+        console.log(`   - msg.key.remoteJid: ${msg?.key?.remoteJid}`);
+        console.log(`   - msg.participant: ${msg?.participant}`);
+        console.log(`   - msg.pushName: ${msg?.pushName}`);
 
         if (!isOwnerMessage(msg, sock)) {
             console.log("🚫 No autorizado");
