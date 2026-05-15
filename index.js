@@ -117,7 +117,9 @@ function getTextMessage(msg) {
 }
 
 function normalizeNumber(jid = "") {
-    return String(jid).split("@")[0].replace(/\D/g, "");
+    // Extraer SOLO los dígitos del inicio (antes de cualquier símbolo)
+    const match = String(jid).match(/^(\d+)/);
+    return match ? match[1] : "";
 }
 
 // 🔥 OWNER FLEXIBLE
