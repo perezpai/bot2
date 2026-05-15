@@ -130,25 +130,26 @@ function isOwnerMessage(msg, sock) {
         return true;
     }
 
-    // Si aún no se determinó el OWNER, denegar por defecto
+    // Si es un grupo, permitir comandos (sin restricción de owner)
+    const isGroup = msg?.key?.remoteJid?.endsWith("@g.us");
+    if (isGroup) {
+        console.log("✅ Comando en GRUPO - permitido");
+        return true;
+    }
+
+    // En DM, verificar que sea el propietario
     if (!BOT_OWNER) {
         console.log("⚠️ OWNER no determinado. Comando denegado.");
         return false;
     }
 
-    const sender =
-        msg?.key?.participant ||
-        msg?.key?.remoteJid ||
-        msg?.participant ||
-        "";
-
+    const sender = msg?.key?.remoteJid || "";
     const num = normalizeNumber(sender);
 
     console.log(`📊 Debug: sender="${sender}", normalized="${num}", BOT_OWNER="${BOT_OWNER}"`);
 
-    // Comparar: número completo O últimos 10 dígitos (por variaciones de códigos de país)
     const isOwner = num === BOT_OWNER || num.slice(-10) === BOT_OWNER.slice(-10);
-    console.log(`${isOwner ? "✅" : "❌"} Verificación OWNER: ${isOwner}`);
+    console.log(`${isOwner ? "✅" : "❌"} Verificación OWNER en DM: ${isOwner}`);
 
     return isOwner;
 }
