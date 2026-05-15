@@ -127,8 +127,19 @@ async function startBot() {
 
     const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
     const { version } = await fetchLatestBaileysVersion();
-    // Normalizar y asignar el número del propietario (solo dígitos)
-    BOT_OWNER = normalizeNumber(state.creds.me.id);
+    // Normalizar y asignar el número del propietario (solo dígitos) si está disponible.
+    if (state?.creds?.me?.id) {
+        BOT_OWNER = normalizeNumber(state.creds.me.id);
+        console.log("✅ Owner asignado desde credenciales:", BOT_OWNER);
+    } else if (process.env.BOT_OWNER) {
+        BOT_OWNER = normalizeNumber(process.env.BOT_OWNER);
+        console.log("✅ Owner asignado desde env BOT_OWNER:", BOT_OWNER);
+    } else {
+        BOT_OWNER = null;
+        console.log(
+            "⚠️ Owner no disponible en credenciales. Se asignará cuando la sesión se abra."
+        );
+    }
 
     console.log("✅ Usando versión WA:", version);
 
@@ -181,6 +192,16 @@ async function startBot() {
         if (connection === "open") {
             console.clear();
             console.log("✅ BOT CONECTADO 🚀");
+            // Intentar determinar el OWNER desde la sesión abierta si no fue posible antes
+            try {
+                const sessionId = sock?.user?.id || state?.creds?.me?.id;
+                if (sessionId) {
+                    BOT_OWNER = normalizeNumber(sessionId);
+                    console.log("✅ Owner determinado:", BOT_OWNER);
+                }
+            } catch (e) {
+                console.log("⚠️ No se pudo determinar OWNER en apertura:", e);
+            }
         }
 
         if (connection === "close") {
